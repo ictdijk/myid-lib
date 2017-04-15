@@ -22,11 +22,21 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+/**
+ * PEM utils for converting Security Objects like Keys and Certifications to and from Strings for easy Transport and Storing
+ */
 public class PemUtils {
 
     public static final String KEY_GENERATION_ALGORITHM = "RSA";
     public static final String PROVIDER_NAME = BouncyCastleProvider.PROVIDER_NAME;
 
+    /**
+     * Converts byte content to String
+     * @param name Name of the Entity
+     * @param content PEM content as String
+     * @return PEM object as String
+     * @throws IOException if content is invalid
+     */
     public static String asPemString(@NonNull String name, @NonNull byte[] content) throws IOException {
         PemObject pemObject = new PemObject(name, content);
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -45,46 +55,52 @@ public class PemUtils {
         }
     }
 
+    /**
+     * Constructs Public Key from PEM encoded String
+     * @param encodedKey PEM object as String
+     * @return Public Key extracted from input String
+     * @throws GeneralSecurityException If input is invalid or missing setup
+     * @throws IOException If input is invalid
+     */
     public static PublicKey decodePublicKey(@NonNull String encodedKey) throws GeneralSecurityException, IOException {
         KeyFactory factory = KeyFactory.getInstance(KEY_GENERATION_ALGORITHM, PROVIDER_NAME);
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(getPemContent(encodedKey));
         return factory.generatePublic(publicKeySpec);
     }
 
+    /**
+     * Convert Public Key into PEM encoded String
+     * @param publicKey Public Key to be converted to String
+     * @return Public Key as String using PEM encoding
+     * @throws GeneralSecurityException If input is invalid or missing setup
+     * @throws IOException If input is invalid
+     */
     public static String encodePublicKey(@NonNull PublicKey publicKey) throws GeneralSecurityException, IOException {
         return asPemString("RSA PUBLIC KEY", publicKey.getEncoded());
     }
 
+    /**
+     * Convert PEM encoded String to Private Key
+     * @param encodedKey
+     * @return Private Key constructed from input string
+     * @throws GeneralSecurityException If input is invalid or missing setup
+     * @throws IOException If input is invalid
+     */
     public static PrivateKey decodePrivateKey(@NonNull String encodedKey) throws GeneralSecurityException, IOException {
         KeyFactory factory = KeyFactory.getInstance(KEY_GENERATION_ALGORITHM, PROVIDER_NAME);
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(getPemContent(encodedKey));
         return factory.generatePrivate(privateKeySpec);
     }
 
+    /**
+     * Convert private key to String
+     * @param privateKey Private key to be converted to string
+     * @return PEM encoded string for input private key
+     * @throws GeneralSecurityException If input is invalid or missing setup
+     * @throws IOException If input is invalid
+     */
     public static String encodePrivateKey(@NonNull PrivateKey privateKey) throws GeneralSecurityException, IOException {
         return asPemString("RSA PRIVATE KEY", privateKey.getEncoded());
-    }
-
-    public static X509Certificate decodeCertificate(@NonNull String encodedCertificate) throws GeneralSecurityException, IOException {
-        ByteArrayInputStream byteStream = new ByteArrayInputStream(getPemContent(encodedCertificate));
-        CertificateFactory factory = CertificateFactory.getInstance("X.509", PROVIDER_NAME);
-        return (X509Certificate)factory.generateCertificate(byteStream);
-    }
-
-    public static String encodeCertificate(@NonNull X509Certificate certificate) throws GeneralSecurityException, IOException {
-        return asPemString("CERTIFICATE", certificate.getEncoded());
-    }
-
-    public static String encodeCertificate(@NonNull X509CertificateHolder certificateHolder) throws GeneralSecurityException, IOException {
-        return asPemString("CERTIFICATE", certificateHolder.getEncoded());
-    }
-
-    public static PKCS10CertificationRequest decodeCertificateRequest(@NonNull String encodedCertificateRequest) throws GeneralSecurityException, IOException {
-        return new PKCS10CertificationRequest(getPemContent(encodedCertificateRequest));
-    }
-
-    public static String encodeCertificateRequest(@NonNull PKCS10CertificationRequest certificateRequest) throws GeneralSecurityException, IOException {
-        return asPemString("CERTIFICATE REQUEST", certificateRequest.getEncoded());
     }
 
 }

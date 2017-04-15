@@ -1,12 +1,15 @@
 package in.yagnyam.myid.utils;
 
-import java.security.*;
-
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
+import java.security.*;
+
+/**
+ * Utilities for Signing and Verification
+ */
 @Slf4j
 public class SignUtils {
 
@@ -16,6 +19,14 @@ public class SignUtils {
     public static final String ALGORITHM_SHA256 = "SHA-256";
     public static final String ALGORITHM_MD5 = "MD5";
 
+    /**
+     * Construct Signature for given content using given algorithm and private key
+     *
+     * @param content    Content to be signed
+     * @param algorithm  Algorithm to use for Signing
+     * @param privateKey Private key for signing
+     * @return Signature as String
+     */
     public static String getSignature(String content, String algorithm, PrivateKey privateKey) {
         try {
             Signature signer = getSignatureInstance(algorithm);
@@ -28,6 +39,15 @@ public class SignUtils {
         }
     }
 
+    /**
+     * Verify the signature using Public Key
+     *
+     * @param content   Content to be verified with given signature
+     * @param algorithm Algorithm to use for Verification
+     * @param publicKey Public key for Verification
+     * @param signature Signature to Verify
+     * @return true if signature mathces, false otherwise
+     */
     public static boolean verifySignature(String content, String algorithm, PublicKey publicKey, String signature) {
         try {
             Signature verifier = getSignatureInstance(algorithm);
@@ -40,11 +60,26 @@ public class SignUtils {
         }
     }
 
+    /**
+     * Proive Signature instance for given algorithm
+     *
+     * @param algorithm of Singature
+     * @return Signature Instance
+     * @throws NoSuchProviderException  If BC is not setup property
+     * @throws NoSuchAlgorithmException If Invalid Algorithm provided as input
+     */
     public static Signature getSignatureInstance(@NonNull String algorithm) throws NoSuchProviderException, NoSuchAlgorithmException {
         return Signature.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
     }
 
 
+    /**
+     * Get Hash for given content using given algorithm
+     *
+     * @param content   Content to find Signature
+     * @param algorithm Algorithm to generate Hash
+     * @return Hash for given inpu
+     */
     public static String getHash(@NonNull String content, @NonNull String algorithm) {
         try {
             MessageDigest md = MessageDigest.getInstance(algorithm);
